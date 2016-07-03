@@ -65,11 +65,17 @@ else
         printf '\n%s\n\n' "Output file ${BOLD}'$OUTPUT'${NORMAL} is not mounted...${GREEN}OK${NORMAL}"
 fi
 
-# Final check against a list of block devices
-printf '\n%s\n\n' "Just to confirm, check "${BOLD}\'$OUTPUT\'${NORMAL}" against this list of block devices:" 
-lsblk --paths | grep --color -E "^$OUTPUT.*$|$"
-printf '\n\n'
-confirm "$OUTPUT" "output"
+# Prompt final explicit check of the output file
+if [[ "$OUTPUT" == /dev/* ]]; then
+        # if output is a block device prompt check against a list...
+        printf '\n%s\n\n' "Just to confirm, check "${BOLD}\'$OUTPUT\'${NORMAL}" against this list of block devices:" 
+        lsblk --paths | grep --color -E "^$OUTPUT.*$|$"
+        printf '\n\n'
+        confirm "$OUTPUT" "output"
+else
+        # ...else just prompt for confirmation, for .img files etc.
+        confirm "$OUTPUT" "output"
+fi
 
 
 
@@ -86,11 +92,10 @@ read  -r -p "If this command is OK, answer yes to run [y/n] " response
 response=${response,,} # to lower case
 if [[ $response =~ ^(yes|y)$ ]]; then
         printf '\n%s\n\n' "Running command..."
+        dd bs=4M if=$INPUT of=$OUTPUT status=progress && sync
 else
         printf '\n%s\n\n' "dd command has been aborted"
         exit
 fi
 
-# Run the dd command
-dd bs=4M if=$INPUT of=$OUTPUT status=progress && sync
 
