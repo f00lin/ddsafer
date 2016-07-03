@@ -10,8 +10,8 @@ GREEN=$(tput setaf 2)
 NORMAL=$(tput sgr0)
 
 # Assign input and output
-input="$1"
-output="$2"
+INPUT="$1"
+OUTPUT="$2"
 
 # Test variables
 INTERNAL_SATA="/dev/sd[a,b,c,d]"
@@ -34,55 +34,55 @@ confirm()
 
 
 ### TEST INPUT ###
-if [[ "$input" != *.iso ]]; then
+if [[ "$INPUT" != *.iso ]]; then
         # give warning if input file is not an .iso 
-        printf '\n%s\n\n' "${RED}WARNING${NORMAL}: "\'$input\'" does not seem to be an ISO file!"
+        printf '\n%s\n\n' "${RED}WARNING${NORMAL}: "\'$INPUT\'" does not seem to be an ISO file!"
         # ask for confirmation, e.g. may be a .img file 
-        confirm "$input" "input"
+        confirm "$INPUT" "input"
 else
-        printf '\n%s\n\n' "'${BOLD}$input${NORMAL}' appears to be an .iso file...${GREEN}OK${NORMAL}"
+        printf '\n%s\n\n' "'${BOLD}$INPUT${NORMAL}' appears to be an .iso file...${GREEN}OK${NORMAL}"
 fi
 
 
 
 ### TEST OUTPUT ###
 # Check output file is NOT an internal SATA disk
-if [[ "$output" == $INTERNAL_SATA ]]; then
+if [[ "$OUTPUT" == $INTERNAL_SATA ]]; then
         # give warning if might be an internal disk
-        printf '\n%s\n\n' "${RED}WARNING${NORMAL}: "\'$output\'" looks like it might be an internal SATA disk"
+        printf '\n%s\n\n' "${RED}WARNING${NORMAL}: "\'$OUTPUT\'" looks like it might be an internal SATA disk"
         # ask for confirmation, e.g. may be restoring a backup from a .img
-        confirm "$output" "output"
+        confirm "$OUTPUT" "output"
 else
-        echo "'${BOLD}$output${NORMAL}' appears not to be an internal SATA disk...${GREEN}OK${NORMAL}"
+        echo "'${BOLD}$OUTPUT${NORMAL}' appears not to be an internal SATA disk...${GREEN}OK${NORMAL}"
 fi
 
 # Check device is NOT mounted
-if grep -qs "$output" /proc/mounts; then
+if grep -qs "$OUTPUT" /proc/mounts; then
         # if mounted, give warning and exit - disk must be unmounted for dd
-        printf '\n%s\n\n' "${RED}WARNING${NORMAL}: ${BOLD}'$output'${NORMAL} is mounted, unmount and try again...exiting"
+        printf '\n%s\n\n' "${RED}WARNING${NORMAL}: ${BOLD}'$OUTPUT'${NORMAL} is mounted, unmount and try again...exiting"
         exit
 else
-        printf '\n%s\n\n' "${BOLD}'$output'${NORMAL} is not mounted...${GREEN}OK${NORMAL}"
+        printf '\n%s\n\n' "${BOLD}'$OUTPUT'${NORMAL} is not mounted...${GREEN}OK${NORMAL}"
 fi
 
 # Final check against a list of block devices
-printf '\n%s\n\n' "Just to confirm again, check "${BOLD}\'$output\'${NORMAL}" against this list:" 
-lsblk
+printf '\n%s\n\n' "Just to confirm again, check "${BOLD}\'$OUTPUT\'${NORMAL}" against this list:" 
+lsblk --paths | grep --color -E "^$OUTPUT.*$|$"
 printf '\n\n'
-confirm "$output" "output"
+confirm "$OUTPUT" "output"
 
 
 
 ### PRINT CONFIRMATION ###
-printf '%s\n\n' ""\'${BOLD}$input${NORMAL}\'" is confirmed as the input file"
-printf '%s\n\n' ""\'${BOLD}$output${NORMAL}\'" is confimed as the output file"
+printf '%s\n\n' ""\'${BOLD}$INPUT${NORMAL}\'" is confirmed as the input file"
+printf '%s\n\n' ""\'${BOLD}$OUTPUT${NORMAL}\'" is confimed as the output file"
 printf '\n%s\n\n' "The following command will be run: "
-printf '%s\n\n' "'dd bs=4M if=${BOLD}$input${NORMAL} of=${BOLD}$output${NORMAL} status=progress && sync'"
+printf '%s\n\n' "'dd bs=4M if=${BOLD}$INPUT${NORMAL} of=${BOLD}$OUTPUT${NORMAL} status=progress && sync'"
 
 
 
 ### FINAL PROMPT ###
-read  -r -p "Is this command OK? [y/n] " response
+read  -r -p "If this command is OK, answer yes to run [y/n] " response
 response=${response,,} # to lower case
 if [[ $response =~ ^(yes|y)$ ]]; then
         printf '\n%s\n\n' "Running command..."
@@ -92,5 +92,5 @@ else
 fi
 
 # Run the dd command
-dd bs=4M if=$input of=$output status=progress && sync
+dd bs=4M if=$INPUT of=$OUTPUT status=progress && sync
 
