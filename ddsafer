@@ -36,11 +36,11 @@ confirm()
 ### TEST INPUT ###
 if [[ "$INPUT" != *.iso ]]; then
         # give warning if input file is not an .iso 
-        printf '\n%s\n\n' "${RED}WARNING${NORMAL}: "\'$INPUT\'" does not seem to be an ISO file!"
-        # ask for confirmation, e.g. may be a .img file 
+        printf '\n%s\n\n' "${RED}WARNING${NORMAL}: "\'$INPUT\'" does not seem to be a .iso file"
+        # ask for confirmation, e.g. may be a .img file or copying directly between disks
         confirm "$INPUT" "input"
 else
-        printf '\n%s\n\n' "'${BOLD}$INPUT${NORMAL}' appears to be an .iso file...${GREEN}OK${NORMAL}"
+        printf '\n%s\n\n' "Input file '${BOLD}$INPUT${NORMAL}' appears to be an .iso file...${GREEN}OK${NORMAL}"
 fi
 
 
@@ -53,7 +53,7 @@ if [[ "$OUTPUT" == $INTERNAL_SATA ]]; then
         # ask for confirmation, e.g. may be restoring a backup from a .img
         confirm "$OUTPUT" "output"
 else
-        echo "'${BOLD}$OUTPUT${NORMAL}' appears not to be an internal SATA disk...${GREEN}OK${NORMAL}"
+        echo "Ouput file '${BOLD}$OUTPUT${NORMAL}' appears not to be an internal SATA disk...${GREEN}OK${NORMAL}"
 fi
 
 # Check device is NOT mounted
@@ -62,11 +62,11 @@ if grep -qs "$OUTPUT" /proc/mounts; then
         printf '\n%s\n\n' "${RED}WARNING${NORMAL}: ${BOLD}'$OUTPUT'${NORMAL} is mounted, unmount and try again...exiting"
         exit
 else
-        printf '\n%s\n\n' "${BOLD}'$OUTPUT'${NORMAL} is not mounted...${GREEN}OK${NORMAL}"
+        printf '\n%s\n\n' "Output file ${BOLD}'$OUTPUT'${NORMAL} is not mounted...${GREEN}OK${NORMAL}"
 fi
 
 # Final check against a list of block devices
-printf '\n%s\n\n' "Just to confirm again, check "${BOLD}\'$OUTPUT\'${NORMAL}" against this list:" 
+printf '\n%s\n\n' "Just to confirm, check "${BOLD}\'$OUTPUT\'${NORMAL}" against this list of block devices:" 
 lsblk --paths | grep --color -E "^$OUTPUT.*$|$"
 printf '\n\n'
 confirm "$OUTPUT" "output"
