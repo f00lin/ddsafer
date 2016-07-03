@@ -4,14 +4,17 @@
 #
 
 # Assign colours and formatting
-bold=$(tput bold)
-red=$(tput setaf 1)
-green=$(tput setaf 2)
-normal=$(tput sgr0)
+BOLD=$(tput bold)
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+NORMAL=$(tput sgr0)
 
 # Assign input and output
 input="$1"
 output="$2"
+
+# Test variables
+INTERNAL_SATA="/dev/sd[a,b,c,d]"
 
 
 confirm()
@@ -19,10 +22,10 @@ confirm()
         _file="$2"
 
         # Prompt for confirmation
-        read  -r -p "Is "\'${bold}$1${normal}\'" the desired "$_file" file? [y/n] " response
+        read  -r -p "Is "\'${BOLD}$1${NORMAL}\'" the desired "$_file" file? [y/n] " response
         response=${response,,} # convert to lower case
         if [[ "$response" =~ ^(yes|y)$ ]]; then
-               printf '\n%s\n\n' "${green}OK${normal}"
+               printf '\n%s\n\n' "${GREEN}OK${NORMAL}"
         else
                 printf '\n%s\n\n' "dd command aborted...exiting"
                 exit
@@ -33,37 +36,37 @@ confirm()
 ### TEST INPUT ###
 if [[ "$input" != *.iso ]]; then
         # give warning if input file is not an .iso 
-        printf '\n%s\n\n' "${red}WARNING${normal}: "\'$input\'" does not seem to be an ISO file!"
+        printf '\n%s\n\n' "${RED}WARNING${NORMAL}: "\'$input\'" does not seem to be an ISO file!"
         # ask for confirmation, e.g. may be a .img file 
         confirm "$input" "input"
 else
-        printf '\n%s\n\n' "'${bold}$input${normal}' appears to be an .iso file...${green}OK${normal}"
+        printf '\n%s\n\n' "'${BOLD}$input${NORMAL}' appears to be an .iso file...${GREEN}OK${NORMAL}"
 fi
 
 
 
 ### TEST OUTPUT ###
 # Check output file is NOT an internal SATA disk
-if [[ "$output" == /dev/sd[a,b,c,d] ]]; then
+if [[ "$output" == $INTERNAL_SATA ]]; then
         # give warning if might be an internal disk
-        printf '\n%s\n\n' "${red}WARNING${normal}: "\'$output\'" looks like it might be an internal SATA disk"
+        printf '\n%s\n\n' "${RED}WARNING${NORMAL}: "\'$output\'" looks like it might be an internal SATA disk"
         # ask for confirmation, e.g. may be restoring a backup from a .img
         confirm "$output" "output"
 else
-        echo "'${bold}$output${normal}' appears not to be an internal SATA disk...${green}OK${normal}"
+        echo "'${BOLD}$output${NORMAL}' appears not to be an internal SATA disk...${GREEN}OK${NORMAL}"
 fi
 
 # Check device is NOT mounted
 if grep -qs "$output" /proc/mounts; then
         # if mounted, give warning and exit - disk must be unmounted for dd
-        printf '\n%s\n\n' "${red}WARNING${normal}: ${bold}'$output'${normal} is mounted, unmount and try again...exiting"
+        printf '\n%s\n\n' "${RED}WARNING${NORMAL}: ${BOLD}'$output'${NORMAL} is mounted, unmount and try again...exiting"
         exit
 else
-        printf '\n%s\n\n' "${bold}'$output'${normal} is not mounted...${green}OK${normal}"
+        printf '\n%s\n\n' "${BOLD}'$output'${NORMAL} is not mounted...${GREEN}OK${NORMAL}"
 fi
 
 # Final check against a list of block devices
-printf '\n%s\n\n' "Just to confirm again, check "${bold}\'$output\'${normal}" against this list:" 
+printf '\n%s\n\n' "Just to confirm again, check "${BOLD}\'$output\'${NORMAL}" against this list:" 
 lsblk
 printf '\n\n'
 confirm "$output" "output"
@@ -71,10 +74,10 @@ confirm "$output" "output"
 
 
 ### PRINT CONFIRMATION ###
-printf '%s\n\n' ""\'${bold}$input${normal}\'" is confirmed as the input file"
-printf '%s\n\n' ""\'${bold}$output${normal}\'" is confimed as the output file"
+printf '%s\n\n' ""\'${BOLD}$input${NORMAL}\'" is confirmed as the input file"
+printf '%s\n\n' ""\'${BOLD}$output${NORMAL}\'" is confimed as the output file"
 printf '\n%s\n\n' "The following command will be run: "
-printf '%s\n\n' "'dd bs=4M if=${bold}$input${normal} of=${bold}$output${normal} status=progress && sync'"
+printf '%s\n\n' "'dd bs=4M if=${BOLD}$input${NORMAL} of=${BOLD}$output${NORMAL} status=progress && sync'"
 
 
 
